@@ -1,27 +1,21 @@
-# src/etl/normaliser.py
-
 import re
-
 def normalize_ticker(ticker):
-    """
-    Convert ticker to uppercase and remove spaces.
-    """
     if ticker is None:
         return None
 
-    return str(ticker).strip().upper()
+    ticker = str(ticker).strip().upper()
+
+    ticker = re.sub(r"\s+", "", ticker)
+
+    return ticker
 
 
 def normalize_year(year):
-    """
-    Convert year formats into integer year.
-    Examples:
-        Mar 2024 -> 2024
-        FY2023 -> 2023
-        2022 -> 2022
-    """
     if year is None:
         return None
+
+    if isinstance(year, int):
+        return year
 
     year = str(year).strip()
 
@@ -30,4 +24,6 @@ def normalize_year(year):
     if match:
         return int(match.group(1))
 
-    raise ValueError(f"Invalid year format: {year}")
+    raise ValueError(
+        f"Invalid year format: {year}"
+    )
