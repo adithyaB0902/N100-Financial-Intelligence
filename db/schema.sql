@@ -36,3 +36,75 @@ CREATE TABLE IF NOT EXISTS cashflow (
     FOREIGN KEY(company_id)
         REFERENCES companies(company_id)
 );
+CREATE TABLE IF NOT EXISTS analysis (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER,
+    year INTEGER,
+    remarks TEXT,
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER,
+    document_type TEXT,
+    url TEXT,
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+
+CREATE TABLE IF NOT EXISTS prosandcons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER,
+    category TEXT,
+    description TEXT,
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+
+CREATE TABLE IF NOT EXISTS sectors (
+    sector_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sector_name TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS stock_prices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER,
+    trade_date DATE,
+    close_price REAL,
+    volume INTEGER,
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+
+CREATE TABLE IF NOT EXISTS financial_ratios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER,
+    year INTEGER,
+    roe REAL,
+    roce REAL,
+    de_ratio REAL,
+    current_ratio REAL,
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+
+CREATE TABLE IF NOT EXISTS peer_groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER,
+    peer_group_name TEXT,
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+CREATE INDEX IF NOT EXISTS idx_pnl_company_year
+ON profitandloss(company_id, year);
+
+CREATE INDEX IF NOT EXISTS idx_bs_company_year
+ON balancesheet(company_id, year);
+
+CREATE INDEX IF NOT EXISTS idx_cf_company_year
+ON cashflow(company_id, year);
+
+CREATE INDEX IF NOT EXISTS idx_prices_company_date
+ON stock_prices(company_id, trade_date);
