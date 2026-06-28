@@ -60,9 +60,6 @@ cursor.execute(
     "PRAGMA foreign_key_check;"
 )
 fk_errors = cursor.fetchall()
-
 print(fk_errors)
-
 conn.close()
-
 print("\nReview Complete.")
