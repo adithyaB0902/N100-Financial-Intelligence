@@ -80,12 +80,60 @@ CREATE TABLE IF NOT EXISTS stock_prices (
 
 CREATE TABLE IF NOT EXISTS financial_ratios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    company_id INTEGER,
-    year INTEGER,
-    roe REAL,
-    roce REAL,
-    de_ratio REAL,
-    current_ratio REAL,
+
+    company_id INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+
+    -- Day 8 KPIs
+    net_profit_margin_pct REAL,
+    operating_profit_margin_pct REAL,
+    return_on_equity_pct REAL,
+    return_on_capital_employed_pct REAL,
+    return_on_assets_pct REAL,
+
+    -- Day 9 KPIs
+    debt_to_equity REAL,
+    high_leverage_flag INTEGER,
+    interest_coverage REAL,
+    icr_label TEXT,
+    icr_warning_flag INTEGER,
+    net_debt REAL,
+    asset_turnover REAL,
+
+    -- Day 10 KPIs
+    revenue_cagr_3yr REAL,
+    revenue_cagr_5yr REAL,
+    revenue_cagr_10yr REAL,
+
+    pat_cagr_3yr REAL,
+    pat_cagr_5yr REAL,
+    pat_cagr_10yr REAL,
+
+    eps_cagr_3yr REAL,
+    eps_cagr_5yr REAL,
+    eps_cagr_10yr REAL,
+
+    revenue_cagr_3yr_flag TEXT,
+    revenue_cagr_5yr_flag TEXT,
+    revenue_cagr_10yr_flag TEXT,
+
+    pat_cagr_3yr_flag TEXT,
+    pat_cagr_5yr_flag TEXT,
+    pat_cagr_10yr_flag TEXT,
+
+    eps_cagr_3yr_flag TEXT,
+    eps_cagr_5yr_flag TEXT,
+    eps_cagr_10yr_flag TEXT,
+
+    -- Day 11 KPIs
+    free_cash_flow_cr REAL,
+    capex_cr REAL,
+    earnings_per_share REAL,
+    book_value_per_share REAL,
+    dividend_payout_ratio_pct REAL,
+    total_debt_cr REAL,
+    cash_from_operations_cr REAL,
+
     FOREIGN KEY(company_id)
         REFERENCES companies(company_id)
 );

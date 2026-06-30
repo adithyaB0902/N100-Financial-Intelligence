@@ -165,3 +165,66 @@ def asset_turnover(
         sales / total_assets,
         2,
     )
+def return_on_capital_employed(
+    operating_profit,
+    equity_capital,
+    reserves,
+    borrowings
+):
+    """
+    Return on Capital Employed (ROCE)
+
+    Formula:
+    Operating Profit /
+    (Equity Capital + Reserves + Borrowings) * 100
+    """
+
+    capital_employed = (
+        equity_capital +
+        reserves +
+        borrowings
+    )
+
+    if capital_employed <= 0:
+        return None
+
+    return round(
+        (operating_profit / capital_employed) * 100,
+        2
+    )
+def roce_status(
+    roce,
+    sector
+):
+    """
+    Financial companies use a different benchmark.
+    """
+
+    if roce is None:
+        return "N/A"
+
+    if sector == "Financials":
+
+        if roce >= 10:
+            return "Good"
+
+        return "Average"
+
+    if roce >= 15:
+        return "Good"
+
+    return "Average"
+def opm_cross_check(
+    calculated_opm,
+    source_opm
+):
+    """
+    Returns True if difference >1%.
+    """
+
+    if calculated_opm is None or source_opm is None:
+        return False
+
+    return abs(
+        calculated_opm - source_opm
+    ) > 1

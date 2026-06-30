@@ -14,6 +14,9 @@ from src.analytics.ratio import (
     icr_warning_flag,
     net_debt,
     asset_turnover,
+    return_on_capital_employed,
+    roce_status,
+    opm_cross_check,
 )
 
 # -----------------------------
@@ -154,3 +157,65 @@ def test_net_debt():
 
 def test_asset_turnover():
     assert asset_turnover(1000, 500) == 2.0
+def test_roce():
+    assert (
+        return_on_capital_employed(
+            100,
+            200,
+            300,
+            500
+        )
+        == 10.0
+    )
+
+
+def test_roce_negative():
+    assert (
+        return_on_capital_employed(
+            100,
+            -100,
+            -100,
+            0
+        )
+        is None
+    )
+
+
+def test_financial_roce():
+    assert (
+        roce_status(
+            11,
+            "Financials"
+        )
+        == "Good"
+    )
+
+
+def test_non_financial_roce():
+    assert (
+        roce_status(
+            16,
+            "Industrials"
+        )
+        == "Good"
+    )
+
+
+def test_opm_match():
+    assert (
+        opm_cross_check(
+            18,
+            18.4
+        )
+        is False
+    )
+
+
+def test_opm_mismatch():
+    assert (
+        opm_cross_check(
+            18,
+            20
+        )
+        is True
+    )
