@@ -22,6 +22,9 @@ from src.analytics.cagr import (
 from src.analytics.quality_score import (
     composite_quality_score
 )
+from src.analytics.validator import FinancialValidator
+from src.analytics.anomaly_detector import AnomalyDetector
+from src.analytics.report_generator import ValidationReport
 
 DB_PATH = "db/nifty100.db"
 
@@ -262,6 +265,56 @@ def main():
     merged = load_data()
 
     ratios = calculate_kpis(merged)
+    print(ratios[["company_id", "year", "return_on_equity_pct"]].head(20))
+    print(ratios["return_on_equity_pct"].describe())
+    validator = FinancialValidator()
+    detector = AnomalyDetector()
+    report = ValidationReport()
+
+    for _, row in ratios.iterrows():
+
+        validation = validator.validate({
+            "net_profit_margin": row["net_profit_margin_pct"],
+            "operating_margin": row["operating_profit_margin_pct"],
+            "roe": row["return_on_equity_pct"],
+            "debt_to_equity": row["debt_to_equity"],
+            "interest_coverage": row["interest_coverage"],
+            "asset_turnover": row["asset_turnover"],
+            "revenue_cagr": row["revenue_cagr_5yr"],
+            "pat_cagr": row["pat_cagr_5yr"],
+            "eps_cagr": row["eps_cagr_5yr"],
+            "composite_quality_score": row["composite_quality_score"],
+            # Required fields for validator
+            "revenue": 1,
+            "pat": 1,
+            "total_assets": 1,
+            "shareholders_equity": 1,
+        })
+
+        anomalies = detector.detect({
+            "roe": row["return_on_equity_pct"],
+            "debt_to_equity": row["debt_to_equity"],
+            "asset_turnover": row["asset_turnover"],
+            "interest_coverage": row["interest_coverage"],
+        })
+
+        report.add_company(
+            row["company_id"],
+            row["year"],
+            validation,
+            anomalies
+        )
+
+    report.export_csv()
+
+    summary = report.summary()
+
+    print("\nValidation Summary")
+    print("-" * 40)
+    print(f"Companies : {summary['companies']}")
+    print(f"Errors    : {summary['errors']}")
+    print(f"Warnings  : {summary['warnings']}")
+    print(f"Anomalies : {summary['anomalies']}")
 
     print("\n" + "=" * 60)
     print("DAY 12 KPI CALCULATION")
