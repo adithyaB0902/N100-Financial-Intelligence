@@ -1,6 +1,6 @@
 import pytest
 
-from src.analytics.ratio import (
+from src.analytics.ratios import (
     net_profit_margin,
     operating_profit_margin,
     validate_opm,
