@@ -3,64 +3,49 @@ def free_cash_flow(
     investing_activity
 ):
     """
-    FCF = CFO + Investing Activity
-    (Investing Activity is usually negative)
+    Free cash flow = CFO + investing activity.
     """
     return operating_activity + investing_activity
 
 
-def cfo_quality_score(
-    cfo_values,
-    pat_values
-):
+def cfo_quality_score(cfo_values, pat_values):
     """
     Average CFO/PAT over available years.
     """
 
     ratios = []
 
-    for cfo, pat in zip(
-        cfo_values,
-        pat_values
-    ):
-
-        if pat == 0:
+    for cfo, pat in zip(cfo_values, pat_values):
+        if cfo is None or pat in (None, 0):
             continue
 
-        ratios.append(
-            cfo / pat
-        )
+        ratios.append(cfo / pat)
 
-    if len(ratios) == 0:
+    if not ratios:
         return None
 
-    avg = sum(ratios) / len(ratios)
+    average = sum(ratios) / len(ratios)
 
-    if avg > 1:
+    if average > 1:
         return "High Quality"
 
-    if avg >= 0.5:
+    if average >= 0.5:
         return "Moderate"
 
     return "Accrual Risk"
 
 
-def capex_intensity(
-    investing_activity,
-    sales
-):
+def capex_intensity(investing_activity, sales):
+    """Return capex intensity as a percentage of sales."""
 
-    if sales == 0:
+    if sales in (None, 0):
         return None
 
-    return abs(
-        investing_activity
-    ) / sales * 100
+    return round(abs(investing_activity) / sales * 100, 2)
 
 
-def capex_label(
-    intensity
-):
+def capex_label(intensity):
+    """Return the capex intensity bucket label."""
 
     if intensity is None:
         return None
@@ -74,56 +59,62 @@ def capex_label(
     return "Capital Intensive"
 
 
-def fcf_conversion(
-    fcf,
-    operating_profit
-):
+def capex_category(intensity):
+    """Compatibility wrapper for capex bucket classification."""
+    return capex_label(intensity)
 
-    if operating_profit == 0:
+
+def fcf_conversion(fcf, operating_profit):
+    """Return free cash flow conversion as a percentage."""
+
+    if operating_profit in (None, 0):
         return None
 
-    return (
-        fcf /
-        operating_profit
-    ) * 100
+    return round((fcf / operating_profit) * 100, 2)
+
+
+def fcf_conversion_rate(free_cash_flow_value, operating_profit):
+    """Compatibility wrapper for the percentage-based FCF conversion."""
+    return fcf_conversion(free_cash_flow_value, operating_profit)
 
 
 def capital_allocation_pattern(
-    cfo,
-    cfi,
-    cff,
+    operating_activity,
+    investing_activity,
+    financing_activity,
     cfo_quality=None
 ):
+    """Classify the capital allocation pattern using the sign pattern."""
 
-    signs = (
-        "+" if cfo >= 0 else "-",
-        "+" if cfi >= 0 else "-",
-        "+" if cff >= 0 else "-"
-    )
+    cfo = "+" if operating_activity >= 0 else "-"
+    cfi = "+" if investing_activity >= 0 else "-"
+    cff = "+" if financing_activity >= 0 else "-"
 
-    if signs == ("+", "-", "-"):
+    pattern = (cfo, cfi, cff)
 
+    if pattern == ("+", "-", "-"):
         if cfo_quality == "High Quality":
             return "Shareholder Returns"
-
         return "Reinvestor"
 
-    if signs == ("+", "+", "-"):
+    if pattern == ("+", "+", "-"):
         return "Liquidating Assets"
 
-    if signs == ("-", "+", "+"):
+    if pattern == ("-", "+", "+"):
         return "Distress Signal"
 
-    if signs == ("-", "-", "+"):
+    if pattern == ("-", "-", "+"):
         return "Growth Funded by Debt"
 
-    if signs == ("+", "+", "+"):
+    if pattern == ("+", "+", "+"):
         return "Cash Accumulator"
 
-    if signs == ("-", "-", "-"):
+    if pattern == ("-", "-", "-"):
         return "Pre-Revenue"
 
-    if signs == ("+", "-", "+"):
+    if pattern == ("+", "-", "+"):
         return "Mixed"
 
-    return "Unknown"
+    return "Other"
+
+  

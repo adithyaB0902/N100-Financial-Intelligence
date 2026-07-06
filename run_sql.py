@@ -1,7 +1,7 @@
 import sqlite3
 import os
 DB_PATH = "db/nifty100.db"
-SQL_FILE = "sql/upgrade_financial_ratios.sql"
+SQL_FILE = "sql/recreate_financial_ratios.sql"
 import os
 
 print("Database:", os.path.abspath("db/nifty100.db"))

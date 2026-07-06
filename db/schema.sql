@@ -88,42 +88,16 @@ CREATE TABLE IF NOT EXISTS financial_ratios (
     net_profit_margin_pct REAL,
     operating_profit_margin_pct REAL,
     return_on_equity_pct REAL,
-    return_on_capital_employed_pct REAL,
-    return_on_assets_pct REAL,
 
     -- Day 9 KPIs
     debt_to_equity REAL,
-    high_leverage_flag INTEGER,
     interest_coverage REAL,
-    icr_label TEXT,
-    icr_warning_flag INTEGER,
-    net_debt REAL,
     asset_turnover REAL,
 
     -- Day 10 KPIs
-    revenue_cagr_3yr REAL,
     revenue_cagr_5yr REAL,
-    revenue_cagr_10yr REAL,
-
-    pat_cagr_3yr REAL,
     pat_cagr_5yr REAL,
-    pat_cagr_10yr REAL,
-
-    eps_cagr_3yr REAL,
     eps_cagr_5yr REAL,
-    eps_cagr_10yr REAL,
-
-    revenue_cagr_3yr_flag TEXT,
-    revenue_cagr_5yr_flag TEXT,
-    revenue_cagr_10yr_flag TEXT,
-
-    pat_cagr_3yr_flag TEXT,
-    pat_cagr_5yr_flag TEXT,
-    pat_cagr_10yr_flag TEXT,
-
-    eps_cagr_3yr_flag TEXT,
-    eps_cagr_5yr_flag TEXT,
-    eps_cagr_10yr_flag TEXT,
 
     -- Day 11 KPIs
     free_cash_flow_cr REAL,
@@ -133,6 +107,14 @@ CREATE TABLE IF NOT EXISTS financial_ratios (
     dividend_payout_ratio_pct REAL,
     total_debt_cr REAL,
     cash_from_operations_cr REAL,
+    revenue_cr REAL,
+    net_profit_cr REAL,
+    composite_quality_score REAL,
+    cfo_quality_score TEXT,
+    capex_intensity_pct REAL,
+    capex_category TEXT,
+    fcf_conversion_pct REAL,
+    capital_allocation_pattern TEXT,
 
     FOREIGN KEY(company_id)
         REFERENCES companies(company_id)
