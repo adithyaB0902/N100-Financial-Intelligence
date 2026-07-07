@@ -1,5 +1,6 @@
 import pandas as pd
 
+from src.screener.engine import ScreenerEngine
 from src.screener.screener import FinancialScreener
 
 
@@ -50,3 +51,21 @@ def test_reset():
     screener.reset(sample_df())
 
     assert screener.count() == 4
+
+
+def test_financials_are_exempt_from_debt_filter():
+
+    df = pd.DataFrame({
+        "company_id": ["HDFCBANK", "RELIANCE"],
+        "return_on_equity_pct": [20, 20],
+        "debt_to_equity": [10, 0.5],
+        "revenue_cagr_5yr": [12, 12],
+        "pat_cagr_5yr": [12, 12],
+        "composite_quality_score": [80, 85]
+    })
+
+    results = ScreenerEngine(df).apply_filters()
+
+    assert "HDFCBANK" in results["company_id"].tolist()
+    assert "RELIANCE" in results["company_id"].tolist()
+    assert "broad_sector" not in results.columns

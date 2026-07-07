@@ -1,52 +1,44 @@
 import sqlite3
 import pandas as pd
-from src.screener.ranking import top_n
-from src.screener.screener import FinancialScreener
 
-conn = sqlite3.connect("db/nifty100.db")
+from src.screener.engine import ScreenerEngine
 
-df = pd.read_sql(
-    "SELECT * FROM financial_ratios",
-    conn
-)
 
-conn.close()
+DB_PATH = "db/nifty100.db"
 
-results = (
-    FinancialScreener(df)
-    .latest_year()
-    .reasonable_roe()
-    .high_roe(20)
-    .low_debt(1)
-    .positive_growth()
-    .high_quality(70)
-    .get_results()
-)
-print(f"Companies found: {len(results)}")
 
-top = top_n(results, 10)
-results.to_csv(
-    "output/screener_results.csv",
-    index=False
-)
+def main():
 
-print("Results exported to output/screener_results.csv")
+    conn = sqlite3.connect(DB_PATH)
 
-print(f"Companies found: {len(results)}")
+    df = pd.read_sql(
+        "SELECT * FROM financial_ratios",
+        conn
+    )
 
-top = top_n(results, 10)
+    conn.close()
 
-print("\nTop 10 Companies\n")
+    print(f"Loaded rows : {len(df)}")
 
-print(
-    top[
-        [
-            "company_id",
-            "year",
-            "composite_quality_score",
-            "return_on_equity_pct",
-            "revenue_cagr_5yr",
-            "pat_cagr_5yr"
-        ]
-    ]
-)
+    engine = ScreenerEngine(df)
+
+    result = engine.apply_filters()
+
+    print(f"Filtered rows : {len(result)}")
+
+    print("\nTop 10 Results\n")
+
+    print(
+        result[
+            [
+                "company_id",
+                "return_on_equity_pct",
+                "debt_to_equity",
+                "composite_quality_score"
+            ]
+        ].head(10)
+    )
+
+
+if __name__ == "__main__":
+    main()
