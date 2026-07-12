@@ -7,6 +7,7 @@ from src.analytics.ratios import (
     net_profit_margin,
     operating_profit_margin,
     return_on_equity,
+    return_on_capital_employed,
     debt_to_equity,
     interest_coverage_ratio,
     asset_turnover
@@ -178,6 +179,17 @@ def calculate_kpis(df):
         ),
         axis=1
     )
+        # Return on Capital Employed (ROCE)
+
+    result["return_on_capital_employed"] = df.apply(
+        lambda r: return_on_capital_employed(
+            r["operating_profit"],
+            r["equity_capital"],
+            r["reserves"],
+            r["borrowings"]
+        ),
+        axis=1
+    )
 
     # Leverage
 
@@ -213,13 +225,15 @@ def calculate_kpis(df):
 
     result["free_cash_flow_cr"] = df.apply(
         lambda r: free_cash_flow(
-            r["operating_activity"],
-            r["investing_activity"]
+            r.get("operating_activity", 0),
+            r.get("investing_activity", 0)
         ),
         axis=1
     )
 
-    result["capex_cr"] = df["investing_activity"].abs()
+    result["capex_cr"] = (
+        df.get("investing_activity", pd.Series(0, index=df.index)).abs()
+    )
 
     # ---------------------------------
     # Additional Cash Flow KPIs
@@ -230,7 +244,10 @@ def calculate_kpis(df):
     # and reuse the value.
 
     def _capex_intensity(r):
-        value = capex_intensity(r["investing_activity"], r["sales"])
+        value = capex_intensity(
+            r.get("investing_activity", 0),
+            r.get("sales", 0)
+        )
         return value if value is not None else None
 
     result["capex_intensity_pct"] = df.apply(_capex_intensity, axis=1)
@@ -246,27 +263,27 @@ def calculate_kpis(df):
 
     # Other KPIs
 
-    result["earnings_per_share"] = df["eps"]
+    result["earnings_per_share"] = df.get("eps", np.nan)
 
     result["book_value_per_share"] = (
-        (df["equity_capital"] + df["reserves"])
-        / df["equity_capital"].replace(0, pd.NA)
+        (df.get("equity_capital", 0) + df.get("reserves", 0))
+        / df.get("equity_capital", 0).replace(0, pd.NA)
     )
 
-    result["dividend_payout_ratio_pct"] = df["dividend_payout"]
+    result["dividend_payout_ratio_pct"] = df.get("dividend_payout", np.nan)
 
-    result["total_debt_cr"] = df["borrowings"]
+    result["total_debt_cr"] = df.get("borrowings", 0)
 
-    result["cash_from_operations_cr"] = df["operating_activity"]
+    result["cash_from_operations_cr"] = df.get("operating_activity", 0)
 
     # FIX: the validator later needs real revenue / PAT / total assets /
     # shareholders' equity, but main() was passing hardcoded 1s for these
     # because they weren't carried into the ratios frame. Carry the raw
     # figures through so validation actually checks real numbers.
-    result["revenue_cr"] = df["sales"]
-    result["net_profit_cr"] = df["net_profit"]
-    result["total_assets_cr"] = df["total_assets"]
-    result["shareholders_equity_cr"] = df["equity_capital"] + df["reserves"]
+    result["revenue_cr"] = df.get("sales", np.nan)
+    result["net_profit_cr"] = df.get("net_profit", np.nan)
+    result["total_assets_cr"] = df.get("total_assets", np.nan)
+    result["shareholders_equity_cr"] = df.get("equity_capital", 0) + df.get("reserves", 0)
 
     # -----------------------------
     # CAGR Calculations
@@ -374,7 +391,7 @@ def write_ratio_edge_cases(ratios):
                 "Category": "Formula Difference",
             })
 
-        roce = row.get("return_on_capital_employed_pct")
+        roce = row.get("return_on_capital_employed")
         if roce is not None and abs(roce) > 5:
             rows.append({
                 "Company": row.get("company_id"),

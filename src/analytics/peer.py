@@ -15,16 +15,17 @@ class PeerEngine:
     """
 
     METRICS = [
-        "return_on_equity_pct",
-        "net_profit_margin_pct",
-        "debt_to_equity",
-        "free_cash_flow_cr",
-        "pat_cagr_5yr",
-        "revenue_cagr_5yr",
-        "eps_cagr_5yr",
-        "interest_coverage",
-        "asset_turnover",
-    ]
+    "return_on_equity_pct",
+    "return_on_capital_employed",
+    "net_profit_margin_pct",
+    "debt_to_equity",
+    "free_cash_flow_cr",
+    "pat_cagr_5yr",
+    "revenue_cagr_5yr",
+    "eps_cagr_5yr",
+    "interest_coverage",
+    "asset_turnover",
+]
 
     def __init__(self, database_path):
 
