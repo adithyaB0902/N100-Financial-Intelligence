@@ -60,7 +60,7 @@ class ScreenerExporter:
 
         return df
 
-    # --------------------------------------------------
+        # --------------------------------------------------
     # Export results to Excel
     # --------------------------------------------------
 
@@ -75,9 +75,9 @@ class ScreenerExporter:
             exist_ok=True
         )
 
-        # -----------------------------
+        # ------------------------------------
         # Write worksheets
-        # -----------------------------
+        # ------------------------------------
         with pd.ExcelWriter(
             output_file,
             engine="openpyxl"
@@ -96,9 +96,9 @@ class ScreenerExporter:
                     index=False
                 )
 
-        # -----------------------------
+        # ------------------------------------
         # Open workbook for formatting
-        # -----------------------------
+        # ------------------------------------
         workbook = load_workbook(output_file)
 
         green_fill = PatternFill(
@@ -113,9 +113,9 @@ class ScreenerExporter:
             end_color="FFC7CE"
         )
 
-        # -----------------------------
-        # Format each worksheet
-        # -----------------------------
+        # ------------------------------------
+        # Format every worksheet
+        # ------------------------------------
         for sheet in workbook.worksheets:
 
             headers = {}
@@ -128,7 +128,9 @@ class ScreenerExporter:
 
             score_col = headers["overall_score"]
 
-            # Highlight overall score
+            # --------------------------------
+            # Highlight Overall Score
+            # --------------------------------
             for row in range(2, sheet.max_row + 1):
 
                 cell = sheet.cell(
@@ -146,7 +148,9 @@ class ScreenerExporter:
                 else:
                     cell.fill = red_fill
 
-            # Auto-fit columns
+            # --------------------------------
+            # Auto-fit column widths
+            # --------------------------------
             for column_cells in sheet.columns:
 
                 max_length = 0
@@ -154,6 +158,7 @@ class ScreenerExporter:
                 for cell in column_cells:
 
                     if cell.value is not None:
+
                         max_length = max(
                             max_length,
                             len(str(cell.value))

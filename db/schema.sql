@@ -138,3 +138,29 @@ ON cashflow(company_id, year);
 
 CREATE INDEX IF NOT EXISTS idx_prices_company_date
 ON stock_prices(company_id, trade_date);
+CREATE TABLE IF NOT EXISTS peer_percentiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    company_id TEXT NOT NULL,
+    peer_group_name TEXT NOT NULL,
+
+    metric TEXT NOT NULL,
+    value REAL,
+    percentile_rank REAL,
+
+    year TEXT,
+
+    FOREIGN KEY(company_id)
+        REFERENCES companies(company_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_peer_percentiles_company
+ON peer_percentiles(company_id);
+
+CREATE INDEX IF NOT EXISTS idx_peer_percentiles_group
+ON peer_percentiles(peer_group_name);
+
+CREATE INDEX IF NOT EXISTS idx_peer_percentiles_metric
+ON peer_percentiles(metric);
+ALTER TABLE financial_ratios
+ADD COLUMN return_on_capital_employed REAL;
