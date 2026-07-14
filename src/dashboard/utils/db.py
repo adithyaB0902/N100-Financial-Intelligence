@@ -145,3 +145,88 @@ def get_pros_cons(ticker):
         """,
         [ticker],
     )
+@st.cache_data(ttl=600)
+def get_latest_ratios(year=None):
+    query = "SELECT * FROM financial_ratios"
+
+    if year is not None:
+        query += " WHERE year LIKE ?"
+        return run_query(query, [f"%{year}"])
+
+    return run_query(query)
+
+
+@st.cache_data(ttl=600)
+def get_company(ticker):
+    return run_query(
+        """
+        SELECT *
+        FROM companies
+        WHERE ticker=?
+        """,
+        [ticker],
+    )
+
+
+@st.cache_data(ttl=600)
+def get_peer_groups():
+    return run_query(
+        """
+        SELECT DISTINCT peer_group
+        FROM peer_groups
+        ORDER BY peer_group
+        """
+    )
+@st.cache_data(ttl=600)
+def get_company(company_id):
+    return run_query(
+        """
+        SELECT *
+        FROM companies
+        WHERE company_id = ?
+        """,
+        [company_id],
+    )
+
+
+@st.cache_data(ttl=600)
+def search_companies():
+    return run_query(
+        """
+        SELECT company_id, ticker, company_name
+        FROM companies
+        ORDER BY company_name
+        """
+    )
+
+
+@st.cache_data(ttl=600)
+def get_company_ratios(company_id):
+    query = """
+    SELECT *
+    FROM financial_ratios
+    WHERE company_id = ?
+    ORDER BY year
+    """
+
+    df = run_query(query, [company_id])
+
+    if df.empty:
+        return df
+
+    # Keep only one record per financial year
+    df = df.drop_duplicates(subset=["year"], keep="last")
+
+    return df
+
+
+@st.cache_data(ttl=600)
+def get_company_pros_cons(company_id):
+    return run_query(
+        """
+        SELECT *
+        FROM prosandcons
+        WHERE company_id = ?
+        """,
+        [company_id],
+    )
