@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from screener.presets import PRESETS
+from src.screener.presets import PRESETS
 
 
 class ScreenerEngine:
