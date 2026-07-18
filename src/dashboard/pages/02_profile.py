@@ -1,3 +1,10 @@
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
@@ -16,10 +23,8 @@ st.title("🏢 Company Profile")
 companies = search_companies()
 
 company_id_key = "company_id" if "company_id" in companies.columns else "id"
-ticker_key = "ticker" if "ticker" in companies.columns else company_id_key
-
 company_options = {
-    f"{row[ticker_key]} - {row['company_name']}": row[company_id_key]
+    f"{row[company_id_key]} - {row['company_name']}": row[company_id_key]
     for _, row in companies.iterrows()
 }
 
@@ -32,7 +37,11 @@ pl = get_pl(company_id)
 sector = get_sectors()
 
 if company.empty:
-    st.error("Ticker not found — please try another.")
+    st.error("Company not found — please try another.")
+    st.stop()
+
+if ratios.empty:
+    st.warning("No financial ratio data is available for this company yet.")
     st.stop()
 
 company = company.iloc[0]
@@ -71,24 +80,15 @@ def fmt(value, suffix=""):
     return f"{value:.2f}{suffix}"
 
 
-month_map = {
-    "Mar": 3,
-    "Jun": 6,
-    "Sep": 9,
-    "Dec": 12,
-}
+def parse_years(df):
+    df = df[df["year"].str.contains(r"\d{4}", na=False)].copy()
+    df["year_num"] = (
+        df["year"].str.extract(r"(\d{4})").astype(int)
+    )
+    return df.sort_values("year_num")
 
-pl["sort_year"] = (
-    pl["year"].astype(str).str[-4:].astype(int) * 100
-    + pl["year"].astype(str).str[:3].map(month_map)
-)
-pl = pl.sort_values("sort_year").drop_duplicates(subset="year", keep="last")
-
-ratios["sort_year"] = (
-    ratios["year"].astype(str).str[-4:].astype(int) * 100
-    + ratios["year"].astype(str).str[:3].map(month_map)
-)
-ratios = ratios.sort_values("sort_year").drop_duplicates(subset="year", keep="last")
+pl = parse_years(pl)
+ratios = parse_years(ratios)
 
 if len(pl) < 10:
     st.info(f"Only {len(pl)} years of financial data are available.")
@@ -98,22 +98,33 @@ latest = ratios.iloc[-1]
 c1, c2, c3 = st.columns(3)
 c4, c5, c6 = st.columns(3)
 
-c1.metric("ROE", fmt(latest["return_on_equity_pct"], "%"))
-c2.metric("ROCE", fmt(latest["return_on_capital_employed"], "%"))
-c3.metric("Net Profit Margin", fmt(latest["net_profit_margin_pct"], "%"))
-c4.metric("Debt / Equity", fmt(latest["debt_to_equity"]))
-c5.metric("Revenue CAGR", fmt(latest["revenue_cagr_5yr"], "%"))
-c6.metric("Free Cash Flow", f"₹ {fmt(latest['free_cash_flow_cr']).replace('N/A', 'N/A')} Cr")
+metric_values = {
+    "ROE": latest.get("return_on_equity_pct"),
+    "ROCE": latest.get("return_on_capital_employed"),
+    "Net Profit Margin": latest.get("net_profit_margin_pct"),
+    "Debt / Equity": latest.get("debt_to_equity"),
+    "Revenue CAGR": latest.get("revenue_cagr_5yr"),
+    "Free Cash Flow": latest.get("free_cash_flow_cr"),
+}
 
-fig = px.bar(
-    pl,
-    x="year",
-    y=["sales", "net_profit"],
-    barmode="group",
-    title="Revenue vs Net Profit",
-)
+c1.metric("ROE", fmt(metric_values["ROE"], "%"))
+c2.metric("ROCE", fmt(metric_values["ROCE"], "%"))
+c3.metric("Net Profit Margin", fmt(metric_values["Net Profit Margin"], "%"))
+c4.metric("Debt / Equity", fmt(metric_values["Debt / Equity"]))
+c5.metric("Revenue CAGR", fmt(metric_values["Revenue CAGR"], "%"))
+c6.metric("Free Cash Flow", f"₹ {fmt(metric_values['Free Cash Flow']).replace('N/A', 'N/A')} Cr")
 
-st.plotly_chart(fig, use_container_width=True)
+if not pl.empty and {"sales", "net_profit"}.issubset(pl.columns):
+    fig = px.bar(
+        pl,
+        x="year",
+        y=["sales", "net_profit"],
+        barmode="group",
+        title="Revenue vs Net Profit",
+    )
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.info("P/L chart data is unavailable for this company.")
 
 fig = go.Figure()
 fig.add_trace(
