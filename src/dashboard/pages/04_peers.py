@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-
+import time
 SRC_ROOT = Path(__file__).resolve().parents[2]
 
 if str(SRC_ROOT) not in sys.path:
@@ -15,7 +15,7 @@ from dashboard.utils.db import (
     get_peer_group_companies,
     get_latest_company_ratios,
 )
-
+start_time = time.perf_counter()
 st.title("👥 Peer Comparison")
 
 # ---------------------------------
@@ -125,4 +125,9 @@ st.dataframe(
     table,
     use_container_width=True,
     hide_index=True,
+)
+end_time = time.perf_counter()
+
+st.caption(
+    f"⚡ Page loaded in {end_time - start_time:.2f} seconds"
 )

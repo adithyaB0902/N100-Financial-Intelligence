@@ -179,15 +179,24 @@ def get_valuation(company_id):
 
 @st.cache_data(ttl=600)
 def get_documents(company_id):
-    return run_query(
+    df = run_query(
         """
         SELECT *
         FROM documents
         WHERE company_id=?
-        ORDER BY year DESC
         """,
         [company_id],
     )
+
+    # Normalize column names to lowercase so this works regardless of
+    # whether the underlying table has "Year"/"Annual_Report" (mixed
+    # case, from an un-normalized ETL load) or "year"/"annual_report".
+    df.columns = [str(c).strip().lower() for c in df.columns]
+
+    if "year" in df.columns:
+        df = df.sort_values("year", ascending=False)
+
+    return df
 
 
 @st.cache_data(ttl=600)
@@ -262,6 +271,21 @@ def get_latest_company_ratios(company_ids):
     """
 
     return run_query(query, company_ids)
+
+
+@st.cache_data(ttl=600)
+def get_latest_financial_ratios():
+    query = """
+    SELECT *
+    FROM financial_ratios fr
+    WHERE fr.year = (
+            SELECT MAX(f2.year)
+            FROM financial_ratios f2
+            WHERE f2.company_id = fr.company_id
+    )
+    """
+
+    return run_query(query)
 
 
 @st.cache_data(ttl=600)

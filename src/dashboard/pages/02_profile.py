@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-
+import time
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
@@ -17,7 +17,7 @@ from utils.db import (
     get_sectors,
     get_pros_cons,
 )
-
+start_time = time.perf_counter()
 st.title("🏢 Company Profile")
 
 companies = search_companies()
@@ -122,7 +122,7 @@ if not pl.empty and {"sales", "net_profit"}.issubset(pl.columns):
         barmode="group",
         title="Revenue vs Net Profit",
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 else:
     st.info("P/L chart data is unavailable for this company.")
 
@@ -148,12 +148,16 @@ fig.add_trace(
 fig.update_layout(
     title="ROE vs ROCE",
     xaxis_title="Year",
-    yaxis_title="ROE (%)",
-    yaxis2_title="ROCE (%)",
+    yaxis=dict(title="ROE (%)"),
+    yaxis2=dict(
+        title="ROCE (%)",
+        overlaying="y",
+        side="right",
+    ),
     template="plotly_white",
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 pros = get_pros_cons(company_id)
 
 if not pros.empty:
@@ -164,3 +168,8 @@ if not pros.empty:
 
     if "cons" in pros.columns:
         st.error(pros.iloc[0]["cons"])
+end_time = time.perf_counter()
+
+st.caption(
+    f"⚡ Page loaded in {end_time - start_time:.2f} seconds"
+)

@@ -96,7 +96,7 @@ fig = px.pie(
     title="Nifty 100 Sector Distribution",
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width='stretch')
 
 # ----------------------------
 # Top Quality Companies
@@ -131,6 +131,6 @@ top5.columns = [
 
 st.dataframe(
     top5,
-    use_container_width=True,
+    width='stretch',
     hide_index=True,
 )

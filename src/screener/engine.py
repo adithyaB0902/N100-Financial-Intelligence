@@ -95,45 +95,31 @@ class ScreenerEngine:
         # Merge Market Cap
         # -------------------------
 
-        if not market_cap.empty:
+        # Only merge market-cap data (P/E, P/B, dividend yield) when the
+        # input dataframe already carries a "year" column. Real callers
+        # (e.g. the dashboard, which loads from `financial_ratios`) always
+        # include "year". Without it, we'd otherwise fall back to matching
+        # on company_id alone and silently attach unrelated live market
+        # data onto small ad-hoc/test frames that never asked for it.
+        if not market_cap.empty and "year" in self.df.columns:
 
             market_cap["year"] = (
-            market_cap["year"]
-        .astype(str)
-        .str.extract(r"(\d{4})")[0]
-    )
-
-    if "year" in self.df.columns:
-
-        self.df["year"] = (
-            self.df["year"]
-            .astype(str)
-            .str.extract(r"(\d{4})")[0]
-        )
-
-        self.df = self.df.merge(
-            market_cap,
-            on=["company_id", "year"],
-            how="left",
-        )
-
-    else:
-
-        latest = (
-            market_cap.sort_values("year")
-            .drop_duplicates(
-                subset="company_id",
-                keep="last",
+                market_cap["year"]
+                .astype(str)
+                .str.extract(r"(\d{4})")[0]
             )
-            .drop(columns="year")
-        )
 
-        self.df = self.df.merge(
-            latest,
-            on="company_id",
-            how="left",
-        )
+            self.df["year"] = (
+                self.df["year"]
+                .astype(str)
+                .str.extract(r"(\d{4})")[0]
+            )
 
+            self.df = self.df.merge(
+                market_cap,
+                on=["company_id", "year"],
+                how="left",
+            )
 
         with open(config_path, "r", encoding="utf-8") as f:
             self.config = yaml.safe_load(f)

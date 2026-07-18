@@ -70,7 +70,8 @@ possible_url_columns = [
     "document_url",
     "bse_link",
     "url",
-    "link"
+    "link",
+    "annual_report"
 
 ]
 

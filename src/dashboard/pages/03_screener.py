@@ -1,9 +1,14 @@
 import sys
 import pathlib
+import time
 SRC_ROOT = pathlib.Path(__file__).resolve().parents[2]
+PROJECT_ROOT = SRC_ROOT.parent
 
 if str(SRC_ROOT) not in sys.path:
     sys.path.append(str(SRC_ROOT))
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.append(str(PROJECT_ROOT))
 
 import streamlit as st
 import pandas as pd
@@ -14,8 +19,8 @@ from dashboard.utils.db import (
     get_sectors,
 )
 
-from screener.engine import ScreenerEngine
-
+from src.screener.engine import ScreenerEngine
+start_time = time.perf_counter()
 st.title("📊 Financial Screener")
 
 # -------------------------------------------------
@@ -255,7 +260,7 @@ display_df = results[available_columns]
 
 st.dataframe(
     display_df,
-    use_container_width=True,
+    width='stretch',
     hide_index=True,
 )
 
@@ -266,4 +271,9 @@ st.download_button(
     data=csv,
     file_name="screener_results.csv",
     mime="text/csv",
+)
+end_time = time.perf_counter()
+
+st.caption(
+    f"⚡ Page loaded in {end_time - start_time:.2f} seconds"
 )

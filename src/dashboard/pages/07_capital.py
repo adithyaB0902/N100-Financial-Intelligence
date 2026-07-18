@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import time
 
 SRC_ROOT = Path(__file__).resolve().parents[2]
 
@@ -19,7 +20,7 @@ st.set_page_config(
     page_title="Capital Allocation",
     layout="wide",
 )
-
+start_time = time.perf_counter()
 st.title("💰 Capital Allocation Map")
 
 st.markdown(
@@ -62,6 +63,8 @@ df = ratios.merge(
 if "id" in df.columns:
 
     df.drop(columns="id", inplace=True)
+
+df["company_name"] = df["company_name"].fillna(df["company_id"])
 
 # --------------------------------------------------
 # Clean Pattern
@@ -133,7 +136,7 @@ st.plotly_chart(
 
     fig,
 
-    use_container_width=True,
+    width='stretch',
 
 )
 
@@ -207,7 +210,7 @@ st.dataframe(
 
     hide_index=True,
 
-    use_container_width=True,
+    width='stretch',
 
 )
 
@@ -231,4 +234,9 @@ st.download_button(
 
     "text/csv",
 
+)
+end_time = time.perf_counter()
+
+st.caption(
+    f"⚡ Page loaded in {end_time - start_time:.2f} seconds"
 )

@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-
+import time
 # --------------------------------------------------------
 # Add src folder to Python path
 # --------------------------------------------------------
@@ -29,6 +29,7 @@ st.set_page_config(
     page_title="Sector Analysis",
     layout="wide"
 )
+start_time = time.perf_counter()
 
 st.title("🏭 Sector Analysis")
 
@@ -91,7 +92,7 @@ market_cap = (
 # Merge Everything
 # --------------------------------------------------------
 
-df = ratios.merge(
+df = ratios.drop(columns=["id"], errors="ignore").merge(
     companies[
         [
             "id",
@@ -209,7 +210,7 @@ st.plotly_chart(
 
     fig,
 
-    use_container_width=True
+    width='stretch'
 
 )
 
@@ -279,7 +280,7 @@ st.plotly_chart(
 
     bar,
 
-    use_container_width=True
+    width='stretch'
 
 )
 
@@ -333,7 +334,7 @@ st.dataframe(
 
     display_df,
 
-    use_container_width=True,
+    width='stretch',
 
     hide_index=True
 
@@ -355,4 +356,9 @@ st.download_button(
 
     mime="text/csv"
 
+)
+end_time = time.perf_counter()
+
+st.caption(
+    f"⚡ Page loaded in {end_time - start_time:.2f} seconds"
 )

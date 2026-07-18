@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-
+import time
 # --------------------------------------------------------
 # Add src folder to Python path
 # --------------------------------------------------------
@@ -23,7 +23,7 @@ st.set_page_config(
     page_title="Trend Analysis",
     layout="wide"
 )
-
+start_time = time.perf_counter()
 st.title("📈 Trend Analysis")
 
 st.markdown(
@@ -85,7 +85,12 @@ df = (
         keep="last"
     )
 )
+years_available = len(df)
 
+if years_available < 10:
+    st.info(
+        f"📌 Only {years_available} years of historical data are available for this company."
+    )
 # --------------------------------------------------------
 # Metrics
 # --------------------------------------------------------
@@ -255,7 +260,7 @@ st.plotly_chart(
 
     fig,
 
-    use_container_width=True
+    width='stretch'
 
 )
 
@@ -272,6 +277,7 @@ st.subheader("Historical Data")
 table_columns = [
 
     "year",
+    "year_num",
 
 ]
 
@@ -293,11 +299,13 @@ table_df = table_df.sort_values(
     ascending=False
 )
 
+table_df = table_df.drop(columns=["year_num"])
+
 st.dataframe(
 
     table_df,
 
-    use_container_width=True,
+    width='stretch',
 
     hide_index=True
 
@@ -324,4 +332,9 @@ st.download_button(
 
     mime="text/csv"
 
+)
+end_time = time.perf_counter()
+
+st.caption(
+    f"⚡ Page loaded in {end_time - start_time:.2f} seconds"
 )
